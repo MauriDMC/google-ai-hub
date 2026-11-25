@@ -349,7 +349,7 @@
             },
             {
                 id: 'code-assist',
-                name: 'Gemini CLI / Code Assist',
+                name: 'Gemini Code Assist',
                 category: 'IA & Desarrollo',
                 url: 'https://cloud.google.com/products/gemini/code-assist',
                 icon: 'terminal-square',
@@ -609,6 +609,175 @@
                     plus_student: 'Administra tus 400 GB y comparte espacio con hasta 5 familiares.',
                     pro_student: 'Administra tus 5 TB por 4 años, beneficios Pro y grupo familiar.',
                     ultra: 'Administra tus 20 TB, YouTube Premium incluido y grupo familiar.'
+                }
+            },
+
+            // --- Servicios agregados (nov 2026) ---
+            {
+                id: 'opal',
+                name: 'Opal',
+                category: 'IA & Desarrollo',
+                url: 'https://opal.google',
+                icon: 'gem',
+                accent: 'blue',
+                description: 'Constructor sin código de Google Labs para crear y compartir mini-apps de IA describiéndolas en lenguaje natural, con un editor visual de flujos.',
+                useCase: 'Prototipar herramientas internas simples sin programar.',
+                planPerks: {
+                    free: 'Experimento de Google Labs de uso gratuito con cuenta Google.',
+                    plus_student: 'Uso gratuito; también disponible como Gem dentro de Gemini.',
+                    pro_student: 'Uso gratuito; combinable con Gemini Pro y Gems personalizados.',
+                    ultra: 'Uso gratuito; combinable con los modelos de frontera de Gemini.'
+                }
+            },
+            {
+                id: 'gemini-cli',
+                name: 'Gemini CLI',
+                category: 'IA & Desarrollo',
+                url: 'https://github.com/google-gemini/gemini-cli',
+                isDownload: true,
+                icon: 'terminal',
+                accent: 'blue',
+                description: 'Agente de IA de código abierto que corre en tu terminal. No tiene página web propia: se instala desde su repositorio oficial (npm) en Windows, macOS o Linux.',
+                useCase: 'Trabajar con Gemini sobre archivos y scripts de tu PC.',
+                planPerks: {
+                    free: 'Cuota gratuita diaria iniciando sesión con cuenta Google.',
+                    plus_student: 'Cuota ampliada asociada a tu suscripción.',
+                    pro_student: 'Límites ampliados de Gemini Pro para tareas largas en terminal.',
+                    ultra: 'Límites máximos para uso intensivo continuo.'
+                }
+            },
+            {
+                id: 'android-studio',
+                name: 'Android Studio (Gemini)',
+                category: 'IA & Desarrollo',
+                url: 'https://developer.android.com/studio',
+                isDownload: true,
+                icon: 'smartphone',
+                accent: 'blue',
+                description: 'IDE oficial para apps Android con Gemini integrado como agente de código. Es una aplicación de escritorio: se descarga e instala en tu PC.',
+                useCase: 'Desarrollar apps móviles con asistencia de IA.',
+                planPerks: {
+                    free: 'Gemini en Android Studio con cuota gratuita estándar.',
+                    plus_student: 'Cuota ampliada de asistencia de IA en el IDE.',
+                    pro_student: 'Límites ampliados con los mejores modelos Gemini para asistencia agéntica.',
+                    ultra: 'Límites máximos de asistencia agéntica.'
+                }
+            },
+
+            {
+                id: 'ai-mode',
+                name: 'Modo IA de Google',
+                category: 'Datos & Investigación',
+                url: 'https://www.google.com/ai',
+                icon: 'search',
+                accent: 'emerald',
+                description: 'Búsqueda conversacional de Google con respuestas generadas por Gemini, preguntas de seguimiento, Deep Search y enlaces a las fuentes.',
+                useCase: 'Investigar temas con fuentes web citadas.',
+                planPerks: {
+                    free: 'Modo IA estándar incluido en la Búsqueda de Google.',
+                    plus_student: 'Mayor acceso a modelos avanzados en el Modo IA.',
+                    pro_student: 'Acceso ampliado a Gemini Pro y Deep Search en el Modo IA.',
+                    ultra: 'Acceso máximo a modelos y funciones de búsqueda profunda.'
+                }
+            },
+
+            {
+                id: 'vids',
+                name: 'Google Vids',
+                category: 'Diseño & Multimedia',
+                url: 'https://vids.google.com',
+                icon: 'video',
+                accent: 'purple',
+                description: 'Editor de video de Workspace con Gemini: genera un guion gráfico desde un prompt o un archivo de Drive, con escenas, música, voz en off y clips con IA.',
+                useCase: 'Videos explicativos, capacitaciones y presentaciones.',
+                planPerks: {
+                    free: 'Funciones básicas de creación con IA para cuentas Gmail.',
+                    plus_student: 'Más generaciones con IA para escenas y voz en off.',
+                    pro_student: 'Funciones avanzadas incluidas en Google AI Pro (Gemini Omni, avatares en regiones habilitadas).',
+                    ultra: 'Máximo acceso a generación de video con IA.'
+                }
+            },
+            {
+                id: 'pomelli',
+                name: 'Pomelli',
+                category: 'Diseño & Multimedia',
+                url: 'https://labs.google.com/pomelli/about',
+                icon: 'megaphone',
+                accent: 'purple',
+                description: 'Experimento de Google Labs y DeepMind que analiza el sitio web de una empresa, extrae su identidad de marca y genera campañas y piezas de marketing.',
+                useCase: 'Contenido de marketing para pymes. Puede no estar disponible en Chile.',
+                planPerks: {
+                    free: 'Experimento gratuito en los países habilitados.',
+                    plus_student: 'Gratuito; disponibilidad según país.',
+                    pro_student: 'Gratuito; disponibilidad según país.',
+                    ultra: 'Gratuito; disponibilidad según país.'
+                }
+            },
+            {
+                id: 'photos',
+                name: 'Google Fotos',
+                category: 'Diseño & Multimedia',
+                url: 'https://photos.google.com',
+                icon: 'image',
+                accent: 'purple',
+                description: 'Biblioteca de fotos y videos en la nube con edición asistida por IA, búsqueda por contenido y herramientas generativas.',
+                useCase: 'Respaldar y editar imágenes de productos y terreno.',
+                planPerks: {
+                    free: 'Edición básica con IA; usa tus 15 GB compartidos.',
+                    plus_student: 'Funciones avanzadas de edición respaldadas por tu almacenamiento ampliado.',
+                    pro_student: 'Más generaciones con IA (algunas solo en EE. UU.) y respaldo en 5 TB.',
+                    ultra: 'Máximas generaciones con IA y respaldo en 20 TB.'
+                }
+            },
+
+            {
+                id: 'chrome-gemini',
+                name: 'Gemini en Chrome',
+                category: 'Workspace & Portales',
+                url: 'https://www.google.com/chrome/',
+                isDownload: true,
+                icon: 'app-window',
+                accent: 'amber',
+                description: 'Gemini integrado en el navegador Chrome para resumir páginas, comparar pestañas y, en planes de pago, navegar de forma automática. Se usa descargando Chrome.',
+                useCase: 'Asistente de IA mientras navegas y trabajas en la web.',
+                planPerks: {
+                    free: 'Gemini en Chrome con funciones estándar.',
+                    plus_student: 'Mayor cuota de uso de Gemini en el navegador.',
+                    pro_student: 'Incluye navegación automática (auto browse) de Gemini en Chrome.',
+                    ultra: 'Máxima cuota y acceso anticipado a funciones agénticas.'
+                }
+            },
+
+            {
+                id: 'vertex-ai',
+                name: 'Vertex AI',
+                category: 'Infraestructura & Nube',
+                url: 'https://console.cloud.google.com/vertex-ai',
+                icon: 'brain-circuit',
+                accent: 'rose',
+                description: 'Plataforma empresarial de Google Cloud para usar Gemini y otros modelos en producción: agentes, RAG, evaluación y despliegue con facturación de Cloud.',
+                useCase: 'Llevar a producción lo que pruebas en AI Studio.',
+                planPerks: {
+                    free: 'Pago por uso de Google Cloud; aplica crédito inicial para cuentas nuevas.',
+                    plus_student: 'Pago por uso de Google Cloud según tu proyecto.',
+                    pro_student: 'Puedes usar los créditos mensuales de Cloud del Google Developer Program.',
+                    ultra: 'Pago por uso; la suscripción no reemplaza la facturación de Cloud.'
+                }
+            },
+            {
+                id: 'dev-program',
+                name: 'Google Developer Program',
+                category: 'Infraestructura & Nube',
+                url: 'https://developers.google.com/program',
+                icon: 'badge-check',
+                accent: 'rose',
+                description: 'Perfil de desarrollador de Google con insignias, laboratorios y beneficios; con Google AI Pro incluye créditos mensuales para Google Cloud.',
+                useCase: 'Activar y revisar tus créditos de Cloud y beneficios de desarrollador.',
+                planPerks: {
+                    free: 'Perfil gratuito con recursos de aprendizaje y laboratorios.',
+                    plus_student: 'Perfil gratuito; beneficios según nivel del programa.',
+                    pro_student: 'Incluye US$10 mensuales en créditos de Google Cloud.',
+                    ultra: 'Beneficios ampliados del programa para desarrolladores.'
                 }
             }
         ];
@@ -965,8 +1134,8 @@
                             rel="noopener noreferrer"
                             class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold shadow-sm transition ${style.btn}"
                         >
-                            <span>Abrir servicio</span>
-                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            <span>${service.isDownload ? 'Descargar aplicación' : 'Abrir servicio'}</span>
+                            <i data-lucide="${service.isDownload ? 'download' : 'external-link'}" class="w-3.5 h-3.5"></i>
                         </a>
 
                         <button 
