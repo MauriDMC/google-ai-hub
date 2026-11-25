@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosistema Google & IA — Centro de Control</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Personalización sutil de scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        .card-glow:hover {
+            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-blue-500/30 selection:text-blue-200">
+
+    <!-- Notificación Toast flotante -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 bg-slate-800 border border-slate-700 text-slate-100 px-4 py-3 rounded-xl shadow-2xl">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+        <span id="toast-msg" class="text-sm font-medium">Acción completada</span>
+    </div>
+
+    <!-- Header / Barra Superior -->
+    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                
+                <!-- Identidad / Título -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                                Ecosistema Google & IA
+                                <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                    Centro de Control
+                                </span>
+                            </h1>
+                            <p class="text-xs text-slate-400">Lanzador unificado de desarrollo, datos, diseño y nube</p>
+                        </div>
+                    </div>
+
+                    <!-- Botón exportar móvil -->
+                    <button onclick="exportBookmarks()" class="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition">
+                        <i data-lucide="bookmark-plus" class="w-4 h-4 text-blue-400"></i>
+                        <span>Marcadores</span>
+                    </button>
+                </div>
+
+                <!-- Buscador + Botón Exportar Desktop -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div class="relative flex-1 sm:w-80 lg:w-96">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Buscar servicio, función o caso de uso..." 
+                            class="w-full bg-slate-900/90 border border-slate-800 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 rounded-xl pl-10 pr-9 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition"
+                        >
+                        <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="exportBookmarks()" title="Descargar archivo HTML listo para importar en Chrome, Edge o Brave" class="hidden lg:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow-lg shadow-blue-600/20 transition cursor-pointer">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Exportar Marcadores (.html)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Filtros por Categoría -->
+            <div class="mt-4 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar" id="categoryFilters">
+                <!-- Se genera dinámicamente desde JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        <!-- Selector Interactivo de Plan de Cuenta Google (Chile) -->
+        <section class="mb-8 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                            <i data-lucide="crown" class="w-3.5 h-3.5"></i>
+                        </span>
+                        <h2 class="text-base sm:text-lg font-bold text-white">Simulador de Plan y Beneficios Activos (Chile)</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Selecciona tu tipo de cuenta para ver costos en CLP, almacenamiento y las capacidades extras que desbloquea en cada herramienta.</p>
+                </div>
+
+                <!-- Pestañas de Selección de Plan -->
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2" id="planSelector">
+                    <!-- Se renderiza dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Panel Resumen Dinámico del Plan Seleccionado -->
+            <div id="planSummaryPanel" class="mt-5">
+                <!-- Se renderiza dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Contenedor de Categorías y Tarjetas -->
+        <div id="servicesContainer" class="space-y-10">
+            <!-- Renderizado dinámico -->
+        </div>
+
+        <!-- Estado vacío cuando no hay coincidencias -->
+        <div id="emptyState" class="hidden py-16 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="search-x" class="w-7 h-7 text-slate-500"></i>
+            </div>
+            <h3 class="text-base font-semibold text-slate-200">No se encontraron servicios</h3>
+            <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Intenta buscar con otros términos como "Python", "GitHub", "SharePoint", "video" o "base de datos".</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-medium text-white transition">
+                Mostrar todos los servicios
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer con instrucciones rápidas de marcadores -->
+    <footer class="border-t border-slate-800/80 bg-slate-950/60 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+                <i data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                <span>Tip: Puedes guardar este archivo HTML en tu PC o subirlo a Drive, o usar <strong>Exportar Marcadores (.html)</strong> e importarlo en <code class="text-slate-300 font-mono">chrome://bookmarks</code>.</span>
+            </div>
+            <div class="text-slate-500">
+                Ecosistema Google AI Pro & Cloud
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lógica de Datos e Interactividad -->
+    <script>
+        // Definición de planes de Google en Chile
+        const PLANS = {
+            free: {
+                id: 'free',
+                name: 'Cuenta Gratuita',
+                shortName: 'Gratuita',
+                badge: 'Estándar',
+                accent: 'slate',
+                price: '$0 CLP/mes',
+                postPromoPrice: 'Sin vencimiento promocional',
+                promoDuration: 'Permanente',
+                storage: '15 GB compartidos',
+                storageNote: 'Drive, Gmail y Google Fotos',
+                familyShare: 'No compartible (individual)',
+                extras: [
+                    'Acceso básico a modelos Gemini estándar',
+                    'Google Colab con tiempos de ejecución limitados (CPU/GPU básica)',
+                    'Google Sites, Docs, Sheets y Forms estándar',
+                    'Firebase con cuota gratuita (Spark Plan)'
+                ]
+            },
+            plus_student: {
+                id: 'plus_student',
+                name: 'Google AI Plus Estudiante',
+                shortName: 'AI Plus Estudiante',
+                badge: 'Promo 1 Año',
+                accent: 'emerald',
+                price: '$0 CLP/mes',
+                postPromoPrice: 'Luego $4.690 CLP/mes tarifa normal',
+                promoDuration: '12 meses con verificación estudiantil',
+                storage: '400 GB totales',
+                storageNote: 'Drive, Gmail y Fotos sin saturar SSD',
+                familyShare: 'Compartible hasta con 5 familiares',
+                extras: [
+                    'Mayor cuota en modelos avanzados de Gemini y Deep Research',
+                    'Gemini integrado en panel lateral de Gmail, Docs y Sheets',
+                    'NotebookLM con mayor límite de fuentes y resúmenes de audio',
+                    'Funciones avanzadas de edición en Google Fotos'
+                ]
+            },
+            pro_student: {
+                id: 'pro_student',
+                name: 'Google AI Pro Estudiante',
+                shortName: 'AI Pro Estudiante',
+                badge: 'Tu Plan Activo · 4 Años',
+                accent: 'blue',
+                price: '~$5.400 – $7.800 CLP/mes',
+                postPromoPrice: 'Tarifa estándar posterior: $21.700 CLP/mes',
+                promoDuration: '4 años (beneficio universitario)',
+                storage: '5 TB (5.000 GB)',
+                storageNote: 'Ideal para nube como disco externo y respaldos .7z',
+                familyShare: 'Compartible hasta con 5 familiares (espacios privados)',
+                extras: [
+                    'Acceso prioritario a modelos Pro/Reasoning, Deep Research y Gems',
+                    'Google Colab Pro: GPUs más rápidas, mayor RAM y sesiones largas',
+                    'Antigravity, Jules y Firebase Studio con cuotas ampliadas de agentes',
+                    'NotebookLM Plus (5x más cuadernos, fuentes y audio)',
+                    'Google Flow y Whisk con créditos mensuales de generación visual/video'
+                ]
+            },
+            ultra: {
+                id: 'ultra',
+                name: 'Google AI Ultra',
+                shortName: 'AI Ultra',
+                badge: 'Máxima Capacidad',
+                accent: 'purple',
+                price: '$89.990 CLP/mes',
+                postPromoPrice: 'Facturación mensual estándar',
+                promoDuration: 'Suscripción mensual sin límite de plazo',
+                storage: '20 TB (20.000 GB)',
+                storageNote: 'Almacenamiento masivo nivel estudio/producción',
+                familyShare: 'Compartible hasta con 5 familiares',
+                extras: [
+                    'Incluye YouTube Premium individual sin anuncios',
+                    'Acceso anticipado y límites máximos en todos los modelos de frontera',
+                    'Máxima cuota de créditos en Google Flow (Veo), Whisk y Stitch',
+                    'Prioridad máxima en agentes autónomos (Antigravity / Jules) y Colab'
+                ]
+            }
+        };
+
+        let activePlanId = 'pro_student';
+
+        // Base de datos completa de servicios organizados por categoría + desbloqueos por plan
+        const SERVICES = [
+            // 1. IA & Desarrollo
+            {
+                id: 'gemini',
+                name: 'Gemini',
+                category: 'IA & Desarrollo',
+                url: 'https://gemini.google.com',
+                icon: 'sparkles',
+                accent: 'blue',
+                description: 'Asistente principal de IA para razonamiento complejo, generación de código, Deep Research, Gems personalizados y espacio interactivo Canvas.',
+                useCase: 'Arquitectura, consultas rápidas y prototipos en vivo.',
+                planPerks: {
+                    free: 'Acceso a modelos estándar con límite diario de consultas y Canvas básico.',
+                    plus_student: 'Cuota ampliada en modelos avanzados, creación de Gems y Deep Research.',
+                    pro_student: 'Contexto extenso (1M+ tokens), Deep Research prioritario y máxima cuota diaria.',
+                    ultra: 'Acceso inmediato a modelos experimentales de frontera y límites máximos.'
+                }
+            },
+            {
+                id: 'ai-studio',
+                name: 'Google AI Studio',
+                category: 'IA & Desarrollo',
+                url: 'https://aistudio.google.com',
+                icon: 'sliders',
+                accent: 'blue',
+                description: 'Entorno técnico para probar modelos Gemini en bruto, ajustar temperatura, instrucciones de sistema, salidas estructuradas y generar API Keys.',
+                useCase: 'Calibrar prompts y lógica antes de llevarlos a producción.',
+                planPerks: {
+                    free: 'Nivel gratuito de API (RPM/TPM limitados) y pruebas en navegador.',
+                    plus_student: 'Misma cuota gratuita de API + acceso a modelos recientes en playground.',
+                    pro_student: 'Integración fluida con proyectos Google Cloud y pruebas masivas de contexto.',
+                    ultra: 'Ideal para prototipado intensivo antes de escalar facturación en Cloud.'
+                }
+            },
+            {
+                id: 'antigravity',
+                name: 'Antigravity',
+                category: 'IA & Desarrollo',
+                url: 'https://antigravity.google',
+                icon: 'bot',
+                accent: 'blue',
+                description: 'Entorno de desarrollo de próxima generación asistido por agentes autónomos capaces de planificar, escribir, ejecutar y verificar código complejo.',
+                useCase: 'Desarrollo integral de aplicaciones dirigido por agentes.',
+                planPerks: {
+                    free: 'Uso básico con límite reducido de tareas simultáneas de agentes.',
+                    plus_student: 'Mayor frecuencia de ejecución de agentes y razonamiento mejorado.',
+                    pro_student: 'Cuota Pro para sesiones prolongadas de agentes multi-archivo y terminal.',
+                    ultra: 'Máxima concurrencia de agentes autónomos y prioridad de cómputo.'
+                }
+            },
+            {
+                id: 'jules',
+                name: 'Jules',
+                category: 'IA & Desarrollo',
+                url: 'https://jules.google.com',
+                icon: 'git-pull-request',
+                accent: 'blue',
+                description: 'Agente de programación asíncrono que se conecta directo a tus repositorios de GitHub para corregir bugs, escribir tests y crear Pull Requests.',
+                useCase: 'Delegar tareas de mantenimiento y pruebas en segundo plano.',
+                planPerks: {
+                    free: 'Límite diario reducido de tareas y Pull Requests en repositorios.',
+                    plus_student: 'Más tareas diarias en paralelo sobre repositorios privados.',
+                    pro_student: 'Cuota ampliada para delegar múltiples issues, tests y refactors al día.',
+                    ultra: 'Capacidad máxima de ejecución continua sobre múltiples repositorios.'
+                }
+            },
+            {
+                id: 'firebase-studio',
+                name: 'Firebase Studio',
+                category: 'IA & Desarrollo',
+                url: 'https://firebase.studio',
+                icon: 'code-2',
+                accent: 'blue',
+                description: 'IDE completo en la nube (antes Project IDX) con agentes IA integrados para levantar proyectos en Python, Django, React y desplegarlos al instante.',
+                useCase: 'Programar desde el navegador sin configurar entorno local.',
+                planPerks: {
+                    free: 'Hasta 3 espacios de trabajo en la nube con asistencia IA estándar.',
+                    plus_student: 'Mayor cuota de asistencia IA integrada dentro del editor web.',
+                    pro_student: 'Más espacios de trabajo activos, máquinas virtuales rápidas y agentes Pro.',
+                    ultra: 'Entornos de mayor potencia y prioridad en compilación y agentes.'
+                }
+            },
+            {
+                id: 'code-assist',
+                name: 'Gemini CLI / Code Assist',
+                category: 'IA & Desarrollo',
+                url: 'https://cloud.google.com/products/gemini/code-assist',
+                icon: 'terminal-square',
+                accent: 'blue',
+                description: 'Asistente de código integrado directamente en tu terminal de comandos y editores como VS Code para autocompletado y refactorización local.',
+                useCase: 'Agilizar desarrollo local conectado a tus archivos.',
+                planPerks: {
+                    free: 'Autocompletado y chat gratuito con límite mensual de sugerencias.',
+                    plus_student: 'Cuota ampliada de consultas en terminal y VS Code.',
+                    pro_student: 'Alta cuota diaria para refactorizar proyectos completos desde CLI/IDE.',
+                    ultra: 'Límites empresariales para uso intensivo continuo en terminal e IDE.'
+                }
+            },
+
+            // 2. Datos & Investigación
+            {
+                id: 'colab',
+                name: 'Google Colab',
+                category: 'Datos & Investigación',
+                url: 'https://colab.research.google.com',
+                icon: 'file-code-2',
+                accent: 'emerald',
+                description: 'Cuadernos interactivos de Python en la nube con acceso prioritario a GPUs/TPUs y alta memoria RAM sin exigir el hardware de tu equipo.',
+                useCase: 'Limpiar datos pesados, scripts ETL y pruebas de IA.',
+                planPerks: {
+                    free: 'GPUs básicas (T4) sujetas a disponibilidad y desconexión por inactividad.',
+                    plus_student: 'Asistencia de código Gemini integrada en celdas de Python.',
+                    pro_student: 'Beneficios Colab Pro: GPUs superiores (L4/A100), alta RAM y ejecución en segundo plano.',
+                    ultra: 'Máximas unidades de cómputo mensuales y prioridad en GPUs de alto rendimiento.'
+                }
+            },
+            {
+                id: 'notebooklm',
+                name: 'NotebookLM',
+                category: 'Datos & Investigación',
+                url: 'https://notebooklm.google.com',
+                icon: 'book-open-check',
+                accent: 'emerald',
+                description: 'Motor de análisis e investigación sobre tus propias fuentes (PDFs, manuales, normativas, código) con citas exactas y resúmenes en audio.',
+                useCase: 'Estudiar documentación densa sin alucinaciones.',
+                planPerks: {
+                    free: 'Hasta 100 cuadernos y 50 fuentes por cuaderno (límite básico de audios).',
+                    plus_student: 'Mayor límite de consultas diarias y generación de Audio Overviews.',
+                    pro_student: 'NotebookLM Plus: hasta 500 cuadernos, 300 fuentes por cuaderno y 5x más audios.',
+                    ultra: 'Límites máximos de fuentes, cuadernos compartidos y generación de audio.'
+                }
+            },
+            {
+                id: 'looker-studio',
+                name: 'Looker Studio',
+                category: 'Datos & Investigación',
+                url: 'https://lookerstudio.google.com',
+                icon: 'bar-chart-3',
+                accent: 'emerald',
+                description: 'Plataforma de visualización de datos para crear dashboards ejecutivos y reportes interactivos conectados a Google Sheets o bases de datos.',
+                useCase: 'Tableros de control y métricas visuales en tiempo real.',
+                planPerks: {
+                    free: '100% gratuito e ilimitado para crear y compartir tableros conectados a Sheets.',
+                    plus_student: 'Incluido sin costo adicional; conecta directo con tus datos en Drive.',
+                    pro_student: 'Incluido sin costo; ideal para visualizar datos procesados desde Colab/Sheets.',
+                    ultra: 'Incluido sin costo con acceso completo a conectores estándar de Google.'
+                }
+            },
+            {
+                id: 'apps-script',
+                name: 'Google Apps Script',
+                category: 'Datos & Investigación',
+                url: 'https://script.google.com',
+                icon: 'workflow',
+                accent: 'emerald',
+                description: 'Plataforma de desarrollo en JavaScript en la nube para automatizar tareas, crear macros y conectar Sheets, Docs, Drive y Gmail.',
+                useCase: 'Automatizar flujos repetitivos en Workspace sin servidores.',
+                planPerks: {
+                    free: 'Cuota estándar de ejecución diaria (6 min por ejecución, disparadores básicos).',
+                    plus_student: 'Misma cuota de ejecución + Gemini ayuda a redactar los scripts.',
+                    pro_student: 'Automatización sobre tus 5 TB de Drive y generación rápida de código con Gemini.',
+                    ultra: 'Automatización completa integrada con todo tu entorno Workspace.'
+                }
+            },
+
+            // 3. Diseño & Multimedia
+            {
+                id: 'stitch',
+                name: 'Google Stitch',
+                category: 'Diseño & Multimedia',
+                url: 'https://stitch.withgoogle.com',
+                icon: 'layout-template',
+                accent: 'purple',
+                description: 'Generador de interfaces web y móviles de alta calidad mediante IA a partir de texto o bocetos, exportando código frontend limpio listo para usar.',
+                useCase: 'Diseñar pantallas y exportar HTML/CSS/React rápido.',
+                planPerks: {
+                    free: 'Generación gratuita de pantallas con límite mensual estándar.',
+                    plus_student: 'Cuota ampliada de iteraciones visuales y exportación de código.',
+                    pro_student: 'Alta cuota de generaciones UI, variantes responsivas y exportación limpia.',
+                    ultra: 'Generaciones prioritarias ilimitadas para prototipado de sistemas completos.'
+                }
+            },
+            {
+                id: 'flow',
+                name: 'Google Flow',
+                category: 'Diseño & Multimedia',
+                url: 'https://labs.google/fx/tools/flow',
+                icon: 'clapperboard',
+                accent: 'purple',
+                description: 'Herramienta cinematográfica de creación con IA (impulsada por Veo e Imagen) con control de movimientos de cámara y continuidad de escenas.',
+                useCase: 'Generar secuencias de video y piezas audiovisuales con IA.',
+                planPerks: {
+                    free: 'Acceso muy limitado o solo vista previa según disponibilidad de Labs.',
+                    plus_student: 'Créditos básicos mensuales para pruebas de video e imagen.',
+                    pro_student: 'Paquete mensual de créditos IA para generar clips con Veo e Imagen.',
+                    ultra: 'Bolsa máxima de créditos mensuales, mayor resolución y renders prioritarios.'
+                }
+            },
+            {
+                id: 'whisk',
+                name: 'Whisk',
+                category: 'Diseño & Multimedia',
+                url: 'https://labs.google/fx/tools/whisk',
+                icon: 'wand-2',
+                accent: 'purple',
+                description: 'Laboratorio visual que permite mezclar sujeto, escena y estilo usando imágenes como referencia directa sin necesidad de escribir prompts largos.',
+                useCase: 'Prototipado visual rápido e inspiración gráfica.',
+                planPerks: {
+                    free: 'Generaciones diarias estándar con Imagen.',
+                    plus_student: 'Mayor cuota diaria de mezclas visuales y descarga rápida.',
+                    pro_student: 'Cuota ampliada y opción de animar resultados mediante créditos Flow/Veo.',
+                    ultra: 'Generación máxima sin esperas y animaciones de alta calidad.'
+                }
+            },
+
+            // 4. Workspace & Portales
+            {
+                id: 'sites',
+                name: 'Google Sites',
+                category: 'Workspace & Portales',
+                url: 'https://sites.google.com',
+                icon: 'globe',
+                accent: 'amber',
+                description: 'Creador visual de intranets, portales internos y wikis de documentación sin código. Funciona como un equivalente ligero a Microsoft SharePoint.',
+                useCase: 'Centralizar carpetas de Drive, formularios y tableros internos.',
+                planPerks: {
+                    free: 'Sitios ilimitados; el peso de los archivos incrustados usa tus 15 GB.',
+                    plus_student: 'Sitios ilimitados respaldados por 400 GB en Drive para documentos.',
+                    pro_student: 'Portales tipo SharePoint respaldados por 5 TB de bibliotecas en Drive.',
+                    ultra: 'Portales masivos respaldados por 20 TB de almacenamiento documental.'
+                }
+            },
+            {
+                id: 'drive',
+                name: 'Google Drive',
+                category: 'Workspace & Portales',
+                url: 'https://drive.google.com',
+                icon: 'hard-drive',
+                accent: 'amber',
+                description: 'Almacenamiento masivo en la nube con sincronización bajo demanda en escritorio para mantener limpios tus discos SSD.',
+                useCase: 'Respaldos cifrados, gestión documental y nube como disco externo.',
+                planPerks: {
+                    free: '15 GB totales compartidos con Gmail y Google Fotos.',
+                    plus_student: '400 GB + panel lateral de Gemini para resumir carpetas y PDFs.',
+                    pro_student: '5 TB (5.000 GB) + Gemini en Drive + compartible con 5 familiares.',
+                    ultra: '20 TB (20.000 GB) + máxima velocidad de indexación y Gemini integrado.'
+                }
+            },
+            {
+                id: 'sheets',
+                name: 'Google Sheets',
+                category: 'Workspace & Portales',
+                url: 'https://docs.google.com/spreadsheets',
+                icon: 'table',
+                accent: 'amber',
+                description: 'Hojas de cálculo colaborativas en la nube con panel lateral de Gemini integrado para generar fórmulas complejas, tablas y análisis rápidos.',
+                useCase: 'Registro operativo, cruces de datos y base ligera de apps.',
+                planPerks: {
+                    free: 'Hojas de cálculo completas sin funciones de IA en el panel lateral.',
+                    plus_student: 'Gemini integrado: crea tablas, fórmulas y gráficos desde texto.',
+                    pro_student: 'Gemini Pro en Sheets: análisis de rangos complejos y resúmenes automáticos.',
+                    ultra: 'Gemini en Sheets con límites máximos de procesamiento de tablas.'
+                }
+            },
+            {
+                id: 'docs',
+                name: 'Google Docs',
+                category: 'Workspace & Portales',
+                url: 'https://docs.google.com/document',
+                icon: 'file-text',
+                accent: 'amber',
+                description: 'Procesador de textos en tiempo real con asistencia de redacción, resumen y estructuración automática mediante Gemini integrado.',
+                useCase: 'Documentación técnica, informes y manuales colaborativos.',
+                planPerks: {
+                    free: 'Edición colaborativa estándar sin redacción asistida por Gemini.',
+                    plus_student: 'Botón "Ayúdame a escribir" y resumen de documentos largos.',
+                    pro_student: 'Gemini Pro en Docs: redacta informes cruzando archivos de tu Drive.',
+                    ultra: 'Asistencia de redacción e investigación profunda sin restricciones.'
+                }
+            },
+            {
+                id: 'forms',
+                name: 'Google Forms',
+                category: 'Workspace & Portales',
+                url: 'https://docs.google.com/forms',
+                icon: 'clipboard-list',
+                accent: 'amber',
+                description: 'Creador de formularios de captura de datos y encuestas con validaciones que envían cada registro automáticamente a Google Sheets.',
+                useCase: 'Ingreso estructurado de solicitudes y registros operativos.',
+                planPerks: {
+                    free: 'Formularios ilimitados; subida de archivos limitada a tus 15 GB.',
+                    plus_student: 'Formularios con recepción de archivos respaldados por 400 GB.',
+                    pro_student: 'Recepción masiva de archivos pesados en formularios (hasta 5 TB).',
+                    ultra: 'Capacidad máxima para recepción de archivos multimedia y respaldos (20 TB).'
+                }
+            },
+
+            // 5. Infraestructura & Nube
+            {
+                id: 'firebase-console',
+                name: 'Firebase Console',
+                category: 'Infraestructura & Nube',
+                url: 'https://console.firebase.google.com',
+                icon: 'flame',
+                accent: 'rose',
+                description: 'Plataforma integral de backend: bases de datos NoSQL (Firestore), autenticación de usuarios, almacenamiento de archivos y Firebase Hosting.',
+                useCase: 'Publicar aplicaciones web en producción y gestionar datos.',
+                planPerks: {
+                    free: 'Plan Spark gratuito (Hosting, Auth y Firestore con cuotas diarias).',
+                    plus_student: 'Plan Spark + asistencia de Gemini en consola para reglas y consultas.',
+                    pro_student: 'Ideal junto a Firebase Studio para desplegar apps full-stack rápidas.',
+                    ultra: 'Depuración asistida por IA avanzada y despliegue continuo.'
+                }
+            },
+            {
+                id: 'google-cloud',
+                name: 'Google Cloud Console',
+                category: 'Infraestructura & Nube',
+                url: 'https://console.cloud.google.com',
+                icon: 'cloud',
+                accent: 'rose',
+                description: 'Consola de infraestructura cloud empresarial para administrar proyectos, habilitar APIs de Google, servidores Cloud Run y almacenamiento.',
+                useCase: 'Control de APIs, credenciales OAuth y servicios backend.',
+                planPerks: {
+                    free: 'Nivel gratuito Always Free + US$300 de crédito inicial para cuentas nuevas.',
+                    plus_student: 'Gestión estándar de proyectos y credenciales OAuth para tus apps.',
+                    pro_student: 'Gemini Cloud Assist integrado para diagnosticar logs y arquitectura.',
+                    ultra: 'Asistencia avanzada de arquitectura y optimización en Cloud Console.'
+                }
+            },
+            {
+                id: 'google-one',
+                name: 'Google One',
+                category: 'Infraestructura & Nube',
+                url: 'https://one.google.com',
+                icon: 'shield-check',
+                accent: 'rose',
+                description: 'Panel de administración de tu suscripción, distribución de almacenamiento y gestión del grupo familiar de hasta 5 personas.',
+                useCase: 'Monitorear espacio ocupado y beneficios activos de tu cuenta.',
+                planPerks: {
+                    free: 'Gestor de limpieza para liberar espacio dentro de tus 15 GB.',
+                    plus_student: 'Administra tus 400 GB y comparte espacio con hasta 5 familiares.',
+                    pro_student: 'Administra tus 5 TB por 4 años, beneficios Pro y grupo familiar.',
+                    ultra: 'Administra tus 20 TB, YouTube Premium incluido y grupo familiar.'
+                }
+            }
+        ];
+
+        const CATEGORIES = [
+            { id: 'all', label: 'Todos los servicios', icon: 'layout-grid' },
+            { id: 'IA & Desarrollo', label: 'IA & Desarrollo', icon: 'cpu' },
+            { id: 'Datos & Investigación', label: 'Datos & Investigación', icon: 'database' },
+            { id: 'Diseño & Multimedia', label: 'Diseño & Multimedia', icon: 'palette' },
+            { id: 'Workspace & Portales', label: 'Workspace & Portales', icon: 'folder-kanban' },
+            { id: 'Infraestructura & Nube', label: 'Infraestructura & Nube', icon: 'server' }
+        ];
+
+        // Mapa de estilos por color de acento
+        const ACCENT_STYLES = {
+            slate: {
+                badge: 'bg-slate-500/10 text-slate-300 border-slate-500/30',
+                iconBg: 'bg-slate-500/10 text-slate-300 border-slate-500/30',
+                btn: 'bg-slate-700 hover:bg-slate-600 text-white',
+                headerDot: 'bg-slate-400',
+                tabActive: 'bg-slate-800 border-slate-500 text-white shadow-lg'
+            },
+            blue: {
+                badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                iconBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20 group-hover:bg-blue-500/20',
+                btn: 'bg-blue-600/90 hover:bg-blue-500 text-white shadow-blue-900/20',
+                headerDot: 'bg-blue-500',
+                tabActive: 'bg-blue-600/20 border-blue-500 text-white shadow-lg shadow-blue-900/20'
+            },
+            emerald: {
+                badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                iconBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20',
+                btn: 'bg-emerald-600/90 hover:bg-emerald-500 text-white shadow-emerald-900/20',
+                headerDot: 'bg-emerald-500',
+                tabActive: 'bg-emerald-600/20 border-emerald-500 text-white shadow-lg shadow-emerald-900/20'
+            },
+            purple: {
+                badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+                iconBg: 'bg-purple-500/10 text-purple-400 border-purple-500/20 group-hover:bg-purple-500/20',
+                btn: 'bg-purple-600/90 hover:bg-purple-500 text-white shadow-purple-900/20',
+                headerDot: 'bg-purple-500',
+                tabActive: 'bg-purple-600/20 border-purple-500 text-white shadow-lg shadow-purple-900/20'
+            },
+            amber: {
+                badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                iconBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20 group-hover:bg-amber-500/20',
+                btn: 'bg-amber-600/90 hover:bg-amber-500 text-white shadow-amber-900/20',
+                headerDot: 'bg-amber-500',
+                tabActive: 'bg-amber-600/20 border-amber-500 text-white shadow-lg shadow-amber-900/20'
+            },
+            rose: {
+                badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+                iconBg: 'bg-rose-500/10 text-rose-400 border-rose-500/20 group-hover:bg-rose-500/20',
+                btn: 'bg-rose-600/90 hover:bg-rose-500 text-white shadow-rose-900/20',
+                headerDot: 'bg-rose-500',
+                tabActive: 'bg-rose-600/20 border-rose-500 text-white shadow-lg shadow-rose-900/20'
+            }
+        };
+
+        let activeCategory = 'all';
+        let searchQuery = '';
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlanSelector();
+            renderPlanSummary();
+            renderCategoryFilters();
+            renderServices();
+
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                document.getElementById('clearSearch').classList.toggle('hidden', searchQuery === '');
+                renderServices();
+            });
+        });
+
+        // Renderizar botones de selección de plan
+        function renderPlanSelector() {
+            const container = document.getElementById('planSelector');
+            container.innerHTML = Object.values(PLANS).map(plan => {
+                const isSelected = activePlanId === plan.id;
+                const style = ACCENT_STYLES[plan.accent];
+                return `
+                    <button
+                        onclick="selectPlan('${plan.id}')"
+                        class="px-3.5 py-2 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            isSelected
+                            ? style.tabActive
+                            : 'bg-slate-950/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }"
+                    >
+                        <div class="flex items-center justify-between gap-2 w-full">
+                            <span class="text-xs font-semibold">${plan.shortName}</span>
+                            ${isSelected ? `<span class="w-2 h-2 rounded-full ${style.headerDot}"></span>` : ''}
+                        </div>
+                        <span class="text-[11px] font-mono mt-0.5 ${isSelected ? 'text-slate-200' : 'text-slate-500'}">${plan.storage.split(' ')[0]} ${plan.storage.split(' ')[1]}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Cambiar plan activo
+        function selectPlan(planId) {
+            activePlanId = planId;
+            renderPlanSelector();
+            renderPlanSummary();
+            renderServices();
+            showToast(`Vista actualizada: ${PLANS[planId].name}`);
+        }
+
+        // Renderizar resumen detallado del plan seleccionado
+        function renderPlanSummary() {
+            const plan = PLANS[activePlanId];
+            const style = ACCENT_STYLES[plan.accent];
+            const container = document.getElementById('planSummaryPanel');
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-4">
+                    <!-- Costo Mensual -->
+                    <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-3.5">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Costo Mensual (Chile)</span>
+                            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+                        </div>
+                        <div class="text-base sm:text-lg font-bold text-white">${plan.price}</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">${plan.postPromoPrice}</div>
+                    </div>
+
+                    <!-- Vigencia / Duración -->
+                    <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-3.5">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Vigencia del Plan</span>
+                            <i data-lucide="calendar-clock" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div class="text-base sm:text-lg font-bold text-white">${plan.promoDuration}</div>
+                        <div class="mt-1">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${style.badge}">
+                                ${plan.badge}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Almacenamiento Total -->
+                    <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-3.5">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Almacenamiento Nube</span>
+                            <i data-lucide="hard-drive" class="w-4 h-4 text-amber-400"></i>
+                        </div>
+                        <div class="text-base sm:text-lg font-bold text-white">${plan.storage}</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">${plan.storageNote}</div>
+                    </div>
+
+                    <!-- Grupo Familiar -->
+                    <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-3.5">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Grupo Familiar</span>
+                            <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
+                        </div>
+                        <div class="text-sm font-semibold text-white leading-snug mt-0.5">${plan.familyShare}</div>
+                        <div class="text-[11px] text-slate-400 mt-1">Privacidad aislada por cuenta</div>
+                    </div>
+                </div>
+
+                <!-- Lista de Beneficios Extras Incluidos -->
+                <div class="bg-slate-950/50 border border-slate-800/80 rounded-xl p-3.5 sm:p-4">
+                    <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span>Beneficios extras incluidos en ${plan.name}:</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        ${plan.extras.map(extra => `
+                            <div class="flex items-start gap-2 text-xs text-slate-300">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.2"></i>
+                                <span>${extra}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Renderizar botones de categorías
+        function renderCategoryFilters() {
+            const container = document.getElementById('categoryFilters');
+            container.innerHTML = CATEGORIES.map(cat => {
+                const isActive = activeCategory === cat.id;
+                const count = cat.id === 'all' 
+                    ? SERVICES.length 
+                    : SERVICES.filter(s => s.category === cat.id).length;
+
+                return `
+                    <button 
+                        onclick="setCategory('${cat.id}')"
+                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer border ${
+                            isActive 
+                            ? 'bg-slate-800 text-white border-slate-600 shadow-sm' 
+                            : 'bg-slate-900/60 text-slate-400 border-slate-800/80 hover:bg-slate-900 hover:text-slate-200'
+                        }"
+                    >
+                        <i data-lucide="${cat.icon}" class="w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-500'}"></i>
+                        <span>${cat.label}</span>
+                        <span class="px-1.5 py-0.2 rounded-md text-[10px] ${isActive ? 'bg-slate-700 text-slate-200' : 'bg-slate-800/80 text-slate-500'}">${count}</span>
+                    </button>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function setCategory(catId) {
+            activeCategory = catId;
+            renderCategoryFilters();
+            renderServices();
+        }
+
+        function clearSearchInput() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            searchQuery = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            renderServices();
+            searchInput.focus();
+        }
+
+        function resetFilters() {
+            activeCategory = 'all';
+            clearSearchInput();
+            renderCategoryFilters();
+        }
+
+        // Renderizar tarjetas agrupadas por categoría
+        function renderServices() {
+            const container = document.getElementById('servicesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            const filtered = SERVICES.filter(service => {
+                const perkText = (service.planPerks && service.planPerks[activePlanId]) ? service.planPerks[activePlanId] : '';
+                const matchesCat = activeCategory === 'all' || service.category === activeCategory;
+                const matchesQuery = !searchQuery || 
+                    service.name.toLowerCase().includes(searchQuery) ||
+                    service.category.toLowerCase().includes(searchQuery) ||
+                    service.description.toLowerCase().includes(searchQuery) ||
+                    service.useCase.toLowerCase().includes(searchQuery) ||
+                    perkText.toLowerCase().includes(searchQuery) ||
+                    service.url.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            // Agrupar resultados por categoría respetando el orden definido
+            const orderedCategories = CATEGORIES.filter(c => c.id !== 'all').map(c => c.id);
+            
+            let html = '';
+
+            orderedCategories.forEach(catName => {
+                const items = filtered.filter(s => s.category === catName);
+                if (items.length === 0) return;
+
+                const style = ACCENT_STYLES[items[0].accent];
+
+                html += `
+                    <section class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-2.5 h-2.5 rounded-full ${style.headerDot}"></span>
+                                <h2 class="text-base sm:text-lg font-semibold text-white tracking-tight">${catName}</h2>
+                            </div>
+                            <span class="text-xs text-slate-500 font-mono">${items.length} ${items.length === 1 ? 'herramienta' : 'herramientas'}</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                            ${items.map(service => createCardHTML(service)).join('')}
+                        </div>
+                    </section>
+                `;
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // Plantilla HTML de cada tarjeta
+        function createCardHTML(service) {
+            const style = ACCENT_STYLES[service.accent];
+            const plan = PLANS[activePlanId];
+            const planStyle = ACCENT_STYLES[plan.accent];
+            const perkDetail = service.planPerks[activePlanId];
+            const cleanUrl = service.url.replace(/^https?:\/\//, '');
+
+            return `
+                <article class="group bg-slate-900/75 hover:bg-slate-900 border border-slate-800/90 hover:border-slate-700 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 card-glow">
+                    <div>
+                        <!-- Cabecera tarjeta -->
+                        <div class="flex items-start justify-between gap-3 mb-3.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-colors ${style.iconBg}">
+                                    <i data-lucide="${service.icon}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-white text-base leading-tight group-hover:text-blue-300 transition-colors">
+                                        ${service.name}
+                                    </h3>
+                                    <span class="text-[11px] font-mono text-slate-500 block mt-0.5 truncate max-w-[180px]">
+                                        ${cleanUrl}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border shrink-0 ${style.badge}">
+                                ${service.category.split(' ')[0]}
+                            </span>
+                        </div>
+
+                        <!-- Descripción -->
+                        <p class="text-sm text-slate-300 leading-relaxed mb-3">
+                            ${service.description}
+                        </p>
+
+                        <!-- Detalle dinámico según el plan seleccionado -->
+                        <div class="bg-slate-950/85 border border-slate-800 rounded-xl p-3 mb-3">
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border ${planStyle.badge}">
+                                    <i data-lucide="crown" class="w-3 h-3"></i>
+                                    <span>${plan.shortName}</span>
+                                </span>
+                                <span class="text-[10px] font-mono text-slate-500">Capacidad / Extra</span>
+                            </div>
+                            <p class="text-xs text-slate-200 leading-relaxed">
+                                ${perkDetail}
+                            </p>
+                        </div>
+
+                        <!-- Caso de uso práctico -->
+                        <div class="bg-slate-950/40 border border-slate-800/60 rounded-xl px-3 py-2 mb-4">
+                            <div class="text-[11px] text-slate-400 flex items-start gap-1.5">
+                                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
+                                <span><strong class="text-slate-300 font-medium">Uso ideal:</strong> ${service.useCase}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <a 
+                            href="${service.url}" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold shadow-sm transition ${style.btn}"
+                        >
+                            <span>Abrir servicio</span>
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        </a>
+
+                        <button 
+                            onclick="copyUrl('${service.url}', '${service.name}')" 
+                            title="Copiar enlace al portapapeles"
+                            class="inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition cursor-pointer"
+                        >
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </article>
+            `;
+        }
+
+        // Copiar URL usando fallback seguro para iframes/navegadores
+        function copyUrl(url, name) {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = url;
+            tempInput.style.position = 'fixed';
+            tempInput.style.opacity = '0';
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Enlace de ${name} copiado`);
+            } catch (err) {
+                showToast('No se pudo copiar el enlace');
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        // Mostrar notificación Toast
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = message;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2600);
+        }
+
+        // Exportar archivo estándar NETSCAPE-Bookmark-file-1 listo para importar en cualquier navegador
+        function exportBookmarks() {
+            const timestamp = Math.floor(Date.now() / 1000);
+            const orderedCategories = CATEGORIES.filter(c => c.id !== 'all').map(c => c.id);
+
+            let bookmarksHTML = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Bookmarks</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>
+    <DT><H3 ADD_DATE="${timestamp}" LAST_MODIFIED="${timestamp}" PERSONAL_TOOLBAR_FOLDER="true">Ecosistema Google & IA</H3>
+    <DL><p>\n`;
+
+            orderedCategories.forEach(catName => {
+                const items = SERVICES.filter(s => s.category === catName);
+                bookmarksHTML += `        <DT><H3 ADD_DATE="${timestamp}" LAST_MODIFIED="${timestamp}">${catName}</H3>\n        <DL><p>\n`;
+                items.forEach(service => {
+                    bookmarksHTML += `            <DT><A HREF="${service.url}" ADD_DATE="${timestamp}">${service.name} — ${service.useCase}</A>\n`;
+                });
+                bookmarksHTML += `        </DL><p>\n`;
+            });
+
+            bookmarksHTML += `    </DL><p>\n</DL><p>`;
+
+            const blob = new Blob([bookmarksHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'marcadores-ecosistema-google-ia.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('Archivo de marcadores descargado');
+        }
+    </script>
+</body>
+</html>
